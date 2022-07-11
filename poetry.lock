@@ -377,7 +377,7 @@ python-versions = "*"
 
 [[package]]
 name = "tygle"
-version = "0.1.0"
+version = "0.1.2"
 description = "Typed Google or simply tygle."
 category = "main"
 optional = false
@@ -386,6 +386,10 @@ python-versions = ">=3.10,<4.0"
 [package.dependencies]
 aiogoogle = "4.0.0"
 pydantic = ">=1.9.0,<2.0.0"
+
+[package.extras]
+drive = ["tygle-drive (>=0.1.0,<0.2.0)"]
+sheets = ["tygle-sheets (>=0.1.0,<0.2.0)"]
 
 [[package]]
 name = "typing-extensions"
@@ -418,7 +422,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "843c11dbeb007e2124c04c666e153c8110961e2098632c195f3bdcbcce62fcf5"
+content-hash = "0e2e937e16eb6e419a9b7ec7ea2f5c19a0f45ac0cdaaee0fe962c8c78f87b60a"
 
 [metadata.files]
 aiofiles = [

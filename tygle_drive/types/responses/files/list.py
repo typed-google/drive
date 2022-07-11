@@ -1,7 +1,7 @@
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
-from tygle.apis.drive.types.resources.files import File
+from tygle_drive.types.resources.files import File
 
 
 class FileList(BaseModel):

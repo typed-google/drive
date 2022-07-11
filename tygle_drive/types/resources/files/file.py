@@ -3,15 +3,15 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Union
 
 from aiofiles.tempfile import AsyncBufferedIOBase
-from pydantic import Field
-from tygle.apis.drive.types.enums.files import (
+from pydantic import Field, PrivateAttr
+from tygle.base import Resource, RESTs
+from tygle_drive.types.enums.files import (
     AnyMimeType,
     ExportMimeType,
     IncludePermissionsForView,
     Space,
 )
-from tygle.apis.drive.types.resources.permissions import Permission
-from tygle.base import Resource
+from tygle_drive.types.resources.permissions import Permission
 
 from .capabilities import Capabilities
 from .content_hints import ContentHints
@@ -22,28 +22,16 @@ from .user import User
 from .video_media_metadata import VideoMediaMetadata
 
 if TYPE_CHECKING:
-    from tygle.apis.drive.rest.files import Files
+    from tygle_drive.rest.files import Files
+
+
+class FileRESTs(RESTs):
+    def __init__(self, Files: "Files") -> None:
+        self.Files = Files
 
 
 class File(Resource):
-    rest: ClassVar["Files"]
-    WRITABLE: ClassVar[List[str]] = [
-        "appProperties",
-        "copyRequiresWriterPermission",
-        "createdTime",
-        "description",
-        "folderColorRgb",
-        "id",
-        "mimeType",
-        "modifiedTime",
-        "name",
-        "originalFilename",
-        "parents",
-        "properties",
-        "starred",
-        "viewedByMeTime",
-        "writersCanShare",
-    ]
+    __rests__: ClassVar[FileRESTs] = PrivateAttr()
 
     def get(
         self,
@@ -55,7 +43,7 @@ class File(Resource):
         supports_all_drives: Optional[bool] = None,
     ):
         if self.id:
-            return self.rest.get(
+            return self.__rests__.Files.get(
                 self.id,
                 acknowledge_abuse=acknowledge_abuse,
                 fields=fields,
@@ -76,7 +64,7 @@ class File(Resource):
         supports_all_drives: Optional[bool] = None,
         use_content_as_indexable_text: Optional[bool] = None,
     ):
-        return self.rest.create(
+        return self.__rests__.Files.create(
             self,
             path,
             ignore_default_visibility=ignore_default_visibility,
@@ -96,7 +84,9 @@ class File(Resource):
         fields: Optional[str] = None,
     ):
         if self.id:
-            return self.rest.export_to_path(self.id, path, mime_type, fields=fields)
+            return self.__rests__.Files.export_to_path(
+                self.id, path, mime_type, fields=fields
+            )
         raise ValueError("id attribute of File object wasn't set.")
 
     def export_to_buffer(
@@ -108,7 +98,9 @@ class File(Resource):
         fields: Optional[str] = None,
     ):
         if self.id:
-            return self.rest.export_to_buffer(self.id, buffer, mime_type, fields=fields)
+            return self.__rests__.Files.export_to_buffer(
+                self.id, buffer, mime_type, fields=fields
+            )
         raise ValueError("id attribute of File object wasn't set.")
 
     kind: Literal["drive#file"] = Field("drive#file")

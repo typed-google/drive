@@ -2,24 +2,24 @@ import json
 from pathlib import Path
 from typing import List, Optional
 
-from aiofiles.tempfile import AsyncBufferedIOBase
 from aiogoogle import GoogleAPI
 from pydantic import create_model
-from tygle.apis.drive.types.enums.files import (
-    ExportMimeType,
-    IncludePermissionsForView,
-)
-from tygle.apis.drive.types.resources.files import File
-from tygle.apis.drive.types.responses.files import FileList
 from tygle.base import REST, BufferRequest, DataRequest, PathRequest
 from tygle.client import Client
+from tygle_drive.types.enums.files import ExportMimeType, IncludePermissionsForView
+from tygle_drive.types.resources.files import File, FileRESTs
+from tygle_drive.types.responses.files import FileList
 
 
 class Files(REST):
     def __init__(self, client: Client, parent: GoogleAPI) -> None:
-        self.File = create_model("File", rest=self, __base__=File)
+        self.File = create_model("File", __base__=File)
+        self.File.__rests__ = FileRESTs(self)
+
         self.FileList = create_model(
-            "FileList", files=(Optional[List[self.File]], None), __base__=FileList
+            "FileList",
+            files=(Optional[List[self.File]], None),
+            __base__=FileList,
         )
 
         super().__init__(client, parent)
@@ -74,7 +74,6 @@ class Files(REST):
     def export_to_buffer(
         self,
         file_id: str,
-        buffer: AsyncBufferedIOBase,
         /,
         mime_type: ExportMimeType,
         *,
@@ -86,7 +85,6 @@ class Files(REST):
                 fileId=file_id,
                 mimeType=mime_type,
                 fields=fields,
-                pipe_to=buffer,
             ),
         )
 

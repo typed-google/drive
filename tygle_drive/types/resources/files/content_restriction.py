@@ -7,11 +7,6 @@ from .user import User
 
 
 class ContentRestriction(BaseModel):
-    WRITABLE: ClassVar[Dict[str, str]] = {
-        "read_only": "readOnly",
-        "reason": "reason",
-    }
-
     read_only: Optional[bool] = Field(None, alias="readOnly")
     reason: Optional[str] = Field(None)
     restricting_user: Optional[User] = Field(None, alias="restrictingUser")
