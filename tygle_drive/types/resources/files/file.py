@@ -1,4 +1,5 @@
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Union
 
@@ -56,6 +57,7 @@ class File(Resource):
         self,
         /,
         path: Optional[Path] = None,
+        buffer: Optional[BytesIO] = None,
         *,
         ignore_default_visibility: Optional[bool] = None,
         include_permissions_for_view: Optional[IncludePermissionsForView] = None,
@@ -67,6 +69,7 @@ class File(Resource):
         return self.__rests__.Files.create(
             self,
             path,
+            buffer,
             ignore_default_visibility=ignore_default_visibility,
             include_permissions_for_view=include_permissions_for_view,
             keep_revision_forever=keep_revision_forever,
