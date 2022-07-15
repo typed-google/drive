@@ -1,10 +1,18 @@
 import json
+from io import BytesIO
 from pathlib import Path
 from typing import List, Optional
 
 from aiogoogle import GoogleAPI
 from pydantic import create_model
-from tygle.base import REST, BufferRequest, DataRequest, PathRequest
+from tygle.base import REST
+from tygle.base.requests import (
+    DataRequest,
+    DownloadToBufferRequest,
+    DownloadToPathRequest,
+    UploadFromBufferRequest,
+    UploadFromPathRequest,
+)
 from tygle.client import Client
 from tygle_drive.types.enums.files import ExportMimeType, IncludePermissionsForView
 from tygle_drive.types.resources.files import File, FileRESTs
@@ -29,6 +37,7 @@ class Files(REST):
         file: File,
         /,
         path: Optional[Path] = None,
+        buffer: Optional[BytesIO] = None,
         *,
         ignore_default_visibility: Optional[bool] = None,
         include_permissions_for_view: Optional[IncludePermissionsForView] = None,
@@ -37,20 +46,29 @@ class Files(REST):
         supports_all_drives: Optional[bool] = None,
         use_content_as_indexable_text: Optional[bool] = None,
     ) -> DataRequest[File]:
-        return DataRequest(
-            self.client,
-            self.parent.files.create(
-                upload_file=path,
-                ignoreDefaultVisibility=ignore_default_visibility,
-                includePermissionsForView=include_permissions_for_view,
-                keepRevisionForever=keep_revision_forever,
-                ocrLanguage=ocr_language,
-                supportsAllDrives=supports_all_drives,
-                useContentAsIndexableText=use_content_as_indexable_text,
-                json=json.loads(file.json(by_alias=True, exclude_unset=True)),
-            ),
-            self.File,
+        if path and buffer:
+            raise ValueError("Either path or buffer could be set. Not both.")
+        request = self.parent.files.create(
+            ignoreDefaultVisibility=ignore_default_visibility,
+            includePermissionsForView=include_permissions_for_view,
+            keepRevisionForever=keep_revision_forever,
+            ocrLanguage=ocr_language,
+            supportsAllDrives=supports_all_drives,
+            useContentAsIndexableText=use_content_as_indexable_text,
+            upload_file=True if path else None,
+            pipe_from=True if buffer else None,
+            json=json.loads(file.json(by_alias=True, exclude_unset=True)),
         )
+
+        if path:
+            return UploadFromPathRequest(
+                self.client, request, path, resource_type=self.File
+            )
+        if buffer:
+            return UploadFromBufferRequest(
+                self.client, request, buffer, resource_type=self.File
+            )
+        return DataRequest(self.client, request, self.File)
 
     def export_to_path(
         self,
@@ -61,14 +79,14 @@ class Files(REST):
         *,
         fields: Optional[str] = None,
     ):
-        return PathRequest(
+        return DownloadToPathRequest(
             self.client,
             self.parent.files.export(
                 fileId=file_id,
                 mimeType=mime_type,
                 fields=fields,
-                download_file=path,
             ),
+            path,
         )
 
     def export_to_buffer(
@@ -79,7 +97,7 @@ class Files(REST):
         *,
         fields: Optional[str] = None,
     ):
-        return BufferRequest(
+        return DownloadToBufferRequest(
             self.client,
             self.parent.files.export(
                 fileId=file_id,
