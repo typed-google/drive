@@ -39,6 +39,7 @@ class Files(REST):
         path: Optional[Path] = None,
         buffer: Optional[BytesIO] = None,
         *,
+        fields: Optional[str] = None,
         ignore_default_visibility: Optional[bool] = None,
         include_permissions_for_view: Optional[IncludePermissionsForView] = None,
         keep_revision_forever: Optional[bool] = None,
@@ -49,6 +50,7 @@ class Files(REST):
         if path and buffer:
             raise ValueError("Either path or buffer could be set. Not both.")
         request = self.parent.files.create(
+            fields=fields,  # Undocumented, but works.
             ignoreDefaultVisibility=ignore_default_visibility,
             includePermissionsForView=include_permissions_for_view,
             keepRevisionForever=keep_revision_forever,
