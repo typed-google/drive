@@ -80,6 +80,31 @@ class File(Resource):
             use_content_as_indexable_text=use_content_as_indexable_text,
         )
 
+    def copy(
+        self,
+        /,
+        file: Optional["File"] = None,
+        *,
+        fields: Optional[str] = None,
+        ignore_default_visibility: Optional[bool] = None,
+        include_labels: Optional[str] = None,
+        include_permissions_for_view: Optional[str] = None,
+        keep_revision_forever: Optional[bool] = None,
+        ocr_language: Optional[str] = None,
+        supports_all_drives: Optional[bool] = None,
+    ):
+        return self.__rests__.Files.copy(
+            self.id,
+            file,
+            fields=fields,
+            ignore_default_visibility=ignore_default_visibility,
+            include_labels=include_labels,
+            include_permissions_for_view=include_permissions_for_view,
+            keep_revision_forever=keep_revision_forever,
+            ocr_language=ocr_language,
+            supports_all_drives=supports_all_drives,
+        )
+
     def export_to_path(
         self,
         path: Path,
