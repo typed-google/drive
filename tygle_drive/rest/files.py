@@ -72,6 +72,36 @@ class Files(REST):
             )
         return DataRequest(self.client, request, self.File)
 
+    def copy(
+        self,
+        file_id: str,
+        /,
+        file: Optional[File] = None,
+        *,
+        fields: Optional[str] = None,
+        ignore_default_visibility: Optional[bool] = None,
+        include_labels: Optional[str] = None,
+        include_permissions_for_view: Optional[str] = None,
+        keep_revision_forever: Optional[bool] = None,
+        ocr_language: Optional[str] = None,
+        supports_all_drives: Optional[bool] = None,
+    ) -> DataRequest[File]:
+        return DataRequest(
+            self.client,
+            self.parent.files.copy(
+                fileId=file_id,
+                fields=fields,
+                ignoreDefaultVisibility=ignore_default_visibility,
+                includeLabels=include_labels,
+                includePermissionsForView=include_permissions_for_view,
+                keepRevisionForever=keep_revision_forever,
+                ocrLanguage=ocr_language,
+                supportsAllDrives=supports_all_drives,
+                json=json.loads(file.json()) if file else None,
+            ),
+            self.File,
+        )
+
     def export_to_path(
         self,
         file_id: str,
